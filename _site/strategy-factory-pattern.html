@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>The Strategy Factory | Kostas Konstantopoulos</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="The Strategy Factory" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Very often it is necessary to choose different algorithms based on runtime conditions. A beautiful way to achieve this is by combining the Strategy and the Factory patterns." />
+<meta property="og:description" content="Very often it is necessary to choose different algorithms based on runtime conditions. A beautiful way to achieve this is by combining the Strategy and the Factory patterns." />
+<link rel="canonical" href="http://localhost:4000/strategy-factory-pattern" />
+<meta property="og:url" content="http://localhost:4000/strategy-factory-pattern" />
+<meta property="og:site_name" content="Kostas Konstantopoulos" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-04-14T22:33:00+03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="The Strategy Factory" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2021-04-14T22:33:00+03:00","datePublished":"2021-04-14T22:33:00+03:00","description":"Very often it is necessary to choose different algorithms based on runtime conditions. A beautiful way to achieve this is by combining the Strategy and the Factory patterns.","headline":"The Strategy Factory","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/strategy-factory-pattern"},"url":"http://localhost:4000/strategy-factory-pattern"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Kostas Konstantopoulos" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Kostas Konstantopoulos</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">The Strategy Factory</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-04-14T22:33:00+03:00" itemprop="datePublished">Apr 14, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Very often it is necessary to choose different algorithms based on runtime conditions. A beautiful way to achieve this is by combining the Strategy and the Factory patterns.</p>
+
+<h2 id="strategy-pattern">Strategy Pattern</h2>
+
+<p>Bellow we have a program that has some data and prints them to console:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c1">#!/usr/bin/python
+</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+
+<span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]):</span>
+    <span class="s">"""
+    Formats data, and saves to specified file.
+    :param data: The data we want to export.
+    """</span>
+    <span class="n">result_formatted</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">result_formatted</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s">"name"</span><span class="p">:</span> <span class="s">"Alice"</span><span class="p">,</span> <span class="s">"location"</span><span class="p">:</span> <span class="s">"Tokyo"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s">"name"</span><span class="p">:</span> <span class="s">"Bob"</span><span class="p">,</span> <span class="s">"location"</span><span class="p">:</span> <span class="s">"Houston"</span><span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="n">export_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span></code></pre></figure>
+
+<p>Let’s say we need to extend this program with new functionalities, for example:</p>
+
+<p><strong>a.</strong> More formats (eg. CSV)</p>
+
+<p><strong>b.</strong> Export to a file.</p>
+
+<p>We could probably get by with a bunch of if-else branches but such a solution can quickly become unmanageable and ugly. The strategy pattern is ideal in a case like this. Essentially it allow us to break down the different complications into separate pluggable components.</p>
+
+<p>We start by defining <em>FormatHandler</em> as an interface that the various formatting handlers must implement. We then define two formatting handlers according to our needs: <em>JSONFormatHandler</em> and <em>CSVFormatHandler</em>.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+
+<span class="k">class</span> <span class="nc">FormatHandler</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="o">@</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="s">"""
+        :param data: Data to format.
+        :return: Formatted data.
+        """</span>
+        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">FormatToJSON</span><span class="p">(</span><span class="n">FormatHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="s">"""
+        :param indent: Number of indentation spaces.
+        """</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">indent</span> <span class="o">=</span> <span class="n">indent</span>
+
+    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">indent</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FormatToCSV</span><span class="p">(</span><span class="n">FormatHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">","</span><span class="p">):</span>
+        <span class="s">"""
+        :param separator: Column separator string.
+        """</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">separator</span> <span class="o">=</span> <span class="n">separator</span>
+
+    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="p">.</span><span class="n">separator</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="p">.</span><span class="n">values</span><span class="p">()))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+        <span class="p">)</span></code></pre></figure>
+
+<p>Similarly we define <em>OutputHandler</em> an interface for the various output handlers. Based on that we define handlers <em>OutputToConsole</em> and <em>OutputToFile</em>.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+
+<span class="k">class</span> <span class="nc">OutputHandler</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="o">@</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="s">"""
+        :param data: Data to output.
+        :return: None
+        """</span>
+        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">OutputToConsole</span><span class="p">(</span><span class="n">OutputHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">OutputToFile</span><span class="p">(</span><span class="n">OutputHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">"w"</span><span class="p">):</span>
+        <span class="s">"""
+        :param filepath: Absolute path of file where data will be saved.
+        :param mode: Mode in which the file is opened.
+        """</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">filepath</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code></pre></figure>
+
+<p>Then we plug in the new components in the export_data and main:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="n">format_handler</span><span class="p">:</span> <span class="n">FormatHandler</span><span class="p">,</span>
+    <span class="n">output_handler</span><span class="p">:</span> <span class="n">OutputHandler</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="s">"""
+    Formats data, and outputs according to specified OutputHandler.
+    :param data: The data we want to export.
+    :param format_handler: Handler object that formats data as desired.
+    :param output_handler: Handler object that outputs data as desired.
+    :return: None
+    """</span>
+    <span class="n">output_handler</span><span class="p">.</span><span class="n">handle</span><span class="p">(</span><span class="n">format_handler</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s">"name"</span><span class="p">:</span> <span class="s">"Alice"</span><span class="p">,</span> <span class="s">"location"</span><span class="p">:</span> <span class="s">"Tokyo"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s">"name"</span><span class="p">:</span> <span class="s">"Bob"</span><span class="p">,</span> <span class="s">"location"</span><span class="p">:</span> <span class="s">"Houston"</span><span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="n">export_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">FormatToJSON</span><span class="p">(),</span> <span class="n">OutputToFile</span><span class="p">(</span><span class="s">"output.json"</span><span class="p">))</span>
+    <span class="n">export_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">FormatToCSV</span><span class="p">(),</span> <span class="n">OutputToConsole</span><span class="p">())</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span></code></pre></figure>
+
+<p>Notice how we multiplex the various components in order to achieve different functionalities (strategies) as desired.</p>
+
+<h2 id="factory-pattern">Factory Pattern</h2>
+
+<p>We can take this one step further and mix the components dynamically according to runtime conditions (such as user input). A nice way to do this is by using the factory pattern.</p>
+
+<p>The factory is essentially a construct that has an “inventory” of items (usually but not necessarily classes), and is able to build instances of these items to order.</p>
+
+<p>In the above example we a factory for the FormatHandlers can look like this:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">FormatHandlerFactory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">inventory</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"json"</span><span class="p">:</span> <span class="n">FormatToJSON</span><span class="p">,</span>
+        <span class="s">"csv"</span><span class="p">:</span> <span class="n">FormatToCSV</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="o">@</span><span class="nb">staticmethod</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FormatHandler</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FormatHandlerFactory</span><span class="p">.</span><span class="n">inventory</span><span class="p">[</span><span class="n">item</span><span class="p">]()</span></code></pre></figure>
+
+<p>Putting everything together:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c1">#!/usr/bin/python
+</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+
+<span class="k">class</span> <span class="nc">FormatHandler</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="o">@</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="s">"""
+        :param data: Data to format.
+        :return: Formatted data.
+        """</span>
+        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">FormatToJSON</span><span class="p">(</span><span class="n">FormatHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="s">"""
+        :param indent: Number of indentation spaces.
+        """</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">indent</span> <span class="o">=</span> <span class="n">indent</span>
+
+    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">indent</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FormatToCSV</span><span class="p">(</span><span class="n">FormatHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">","</span><span class="p">):</span>
+        <span class="s">"""
+        :param separator: Column separator string.
+        """</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">separator</span> <span class="o">=</span> <span class="n">separator</span>
+
+    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="p">.</span><span class="n">separator</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="p">.</span><span class="n">values</span><span class="p">()))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+        <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">OutputHandler</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="o">@</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="s">"""
+        :param data: Data to output.
+        :return: None
+        """</span>
+        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">OutputToConsole</span><span class="p">(</span><span class="n">OutputHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">OutputToFile</span><span class="p">(</span><span class="n">OutputHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">"w"</span><span class="p">):</span>
+        <span class="s">"""
+        :param filepath: Absolute path of file where data will be saved.
+        :param mode: Mode in which the file is opened.
+        """</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">filepath</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="n">format_handler</span><span class="p">:</span> <span class="n">FormatHandler</span><span class="p">,</span>
+    <span class="n">output_handler</span><span class="p">:</span> <span class="n">OutputHandler</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="s">"""
+    Formats data, and outputs according to specified OutputHandler.
+    :param data: The data we want to export.
+    :param format_handler: Handler object that formats data as desired.
+    :param output_handler: Handler object that outputs data as desired.
+    :return: None
+    """</span>
+    <span class="n">output_handler</span><span class="p">.</span><span class="n">handle</span><span class="p">(</span><span class="n">format_handler</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">FormatHandlerFactory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">inventory</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"json"</span><span class="p">:</span> <span class="n">FormatToJSON</span><span class="p">,</span>
+        <span class="s">"csv"</span><span class="p">:</span> <span class="n">FormatToCSV</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="o">@</span><span class="nb">staticmethod</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FormatHandler</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FormatHandlerFactory</span><span class="p">.</span><span class="n">inventory</span><span class="p">[</span><span class="n">item</span><span class="p">]()</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">format_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s">"name"</span><span class="p">:</span> <span class="s">"Alice"</span><span class="p">,</span> <span class="s">"location"</span><span class="p">:</span> <span class="s">"Tokyo"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s">"name"</span><span class="p">:</span> <span class="s">"Bob"</span><span class="p">,</span> <span class="s">"location"</span><span class="p">:</span> <span class="s">"Houston"</span><span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">format_handler</span> <span class="o">=</span> <span class="n">FormatHandlerFactory</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="n">format_name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="nb">KeyError</span><span class="p">:</span>
+        <span class="n">format_handler</span> <span class="o">=</span> <span class="n">FormatToJSON</span><span class="p">()</span>  <span class="c1"># default
+</span>
+    <span class="n">export_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">format_handler</span><span class="p">,</span> <span class="n">OutputToConsole</span><span class="p">())</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">format_name_clean</span> <span class="o">=</span> <span class="s">"csv"</span>  <span class="c1"># e.g. read this from argv
+</span>    <span class="n">main</span><span class="p">(</span><span class="n">format_name_clean</span><span class="p">)</span></code></pre></figure>
+
+
+  </div><a class="u-url" href="/strategy-factory-pattern" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+    <data class="u-url" href="/"></data>
+    <div class="wrapper">
+      <div class="social-links"><ul class="social-media-list">
+<!---->
+<!---->
+<!----><li><a href="https://github.com/kdop"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kdop</span></a></li><!----><li><a href="https://www.linkedin.com/in/ntopoulos"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#linkedin"></use></svg> <span class="username">ntopoulos</span></a></li><!---->
+<!---->
+<!--<li><a href="https://www.twitter.com/ntopoulos"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">ntopoulos</span></a></li>-->
+<!---->
+<!---->
+<!---->
+</ul></div>
+    </div>
+</footer>
+</body>
+
+</html>
